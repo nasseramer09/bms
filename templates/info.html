@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block main %}
+	<h1> Info </h1>
+{% endblock %}
+{% block body%}
+
+
+       <div>
+    <table>
+        <thead><tr>
+            <th>Parameter</th>
+            <th>Värde</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Simuleringstid:(timme)</td>
+            <td id="sim-hour">{{ data['sim_time_hour']}} : {{data['sim_time_min'] }}</td>
+        </tr>
+        <tr>
+            <td>Hushållets energiförbrukning</td>
+            <td id="current-load">{{ data['base_current_load'] }} kWh </td>
+        </tr>
+
+           <tr>
+            <td>Totala Hushållets energiförbrukning i ett dygn </td>
+            <td id="total-energy">{{ total_energy_consumption }} kWh </td>
+        </tr>
+
+         <tr>
+            <td>EV batteri kapacitet </td>
+            <td id="battery-capacity">{{ data['battery_capacity_kWh'] }} kWh </td>
+        </tr>
+
+          <tr>
+            <td>EV-batteri laddning status </td>
+            <td id="charging-status">
+                {% if data['ev_battery_charge_start_stopp'] %} På {% else %} Av {% endif %}  </td>
+        </tr>
+         <tr>
+            <td>Batterinivå i procent </td>
+            <td id="battery-percent">{{ data['ev_batt_capacity_percent'] }} % </td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div>
+    <button id="toggle-button" class="{% if data['ev_battery_charge_start_stopp'] %} charging-on {% else %} charging-off {% endif %}">
+    {% if data['ev_battery_charge_start_stopp'] %}
+    Stoppa laddningen
+    {% else %}
+    Starta laddning
+    {% endif %}
+    </button>
+
+     <button id="discharge-button" class="discharge-button">
+            Nollställ batteri
+        </button>
+    </div>
+
+
+
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+
+     //handles the on/of button functionality
+    document.addEventListener("DOMContentLoaded", ()=> {
+        const button = document.getElementById("toggle-button")
+        const statusElement = document.getElementById("charging-status");
+
+
+        button.addEventListener("click", () => {
+            const isCurrentlyCharging = statusElement.textContent.trim() === "På";
+            const actualStatus = isCurrentlyCharging ? "off" : "on";
+
+            fetch('/charging_handle', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({charging: actualStatus})
+            }).then(response => response.json())
+                .then(data => {
+                    const isCharging = actualStatus === "on";
+                    statusElement.textContent = isCharging ? "På" : "Av";
+                    button.textContent = isCharging ? "Stoppa laddningen" : "Starta laddningen";
+                    button.className = isCharging ? "charging-on" : "charging-off";
+                }).catch(error => console.error("Error toggling charge", error));
+        });
+
+
+
+        //discharge button
+        const dischargeButton = document.getElementById("discharge-button");
+
+        dischargeButton.addEventListener("click", ()=>{
+            fetch('/discharge', {
+                method: 'POST',
+                headers:{'Content-Type': 'application/json'},
+                body:JSON.stringify({discharging: "on"}) // is going to send command to discharge the battery
+            }).then(response=>response.json())
+              .then(data=>{
+                if(data.discharging==="on "){
+                    alert("Batteriet har nollställts!");
+                    document.getElementById("charging-status").textContent = "Av";
+                    document.getElementById("battery-percent").textContent = "20 %"
+                    document.getElementById("battery-capacity").textContent = "9.26kwh";
+                }else{
+                    alert("Nollställningen misslyckades");
+                }
+            }).catch(error => console.error("Error while discharging", error))
+        });
+
+        //connects to the socket server
+        const socket = io();
+        //listens for updates from the server side
+        socket.on('update_time', (data) => {
+            document.getElementById("sim-hour").textContent = `${data.sim_time_hour}:${data.sim_time_min}`;
+            document.getElementById("current-load").textContent = `${data.base_current_load} kwh`;
+            document.getElementById("battery-capacity").textContent = `${data.battery_capacity_kWh } kwh`;
+            document.getElementById("battery-percent").textContent = `${data.ev_batt_capacity_percent} % `;
+            document.getElementById('optimized-kwh').textContent = `${data.optimized_kwh } kwh ` ;
+
+
+        });
+    });
+    </script>
+{% endblock %}

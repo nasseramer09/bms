@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body %}
+
+    <h1> Hushållets energiförbrukning per time </h1>
+
+	 <table border="1">
+       <thead>
+       <tr>
+        <th>Tid</th>
+        <th>Förbrukning (kwh) </th>
+        </tr>
+       </thead>
+     <tbody>
+    {% for cons in data %}
+        <tr>
+        <td>{{ loop.index0 }}:0</td>
+        <td>{{ cons }} KW </td>
+        </tr>
+
+
+{% endfor %}
+</tbody>
+    </table>
+
+    <p>
+    Total förbrukningen under dygnet <strong>{{ data |sum }} KW </strong>
+    </p>
+{% endblock %}

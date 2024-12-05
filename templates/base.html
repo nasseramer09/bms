@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BMS_EV laddstation </title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" >
+    {% block head %}
+    	<h1> EV laddstation </h1>
+         <nav>
+    <ul>
+
+        <li> <a href="/info"> Info </a> </li>
+        <li> <a href="/baseload"> Energiförbrukning </a> </li>
+        <li> <a href="/priceperhour"> Timpris </a> </li>
+
+
+    </ul>
+    </nav>
+    {% endblock %}
+</head>
+<body>
+{% block main %}
+
+
+{% endblock %}
+{% block body %}
+
+
+{% endblock %}
+</body>
+</html>

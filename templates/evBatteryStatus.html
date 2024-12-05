@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block body %}
+    <h1>EV batteri status </h1>
+    <div>
+    <p>Batterinivå: <span id="battery-level">{{ data['battery_capacity_kWh'] }}</span>kWh</p>
+    <p>Batterinivå i procent: <span id="battery-percent">{{ data['ev_batt_capacity__percent'] }}</span> % </p>
+    <p>Laddningsstatus: <span id="charging-status">{% if data['ev_battery_charge_start_stopp'] %} På {% else %} Av {% endif %}</span></p>
+
+        <button id="toggle-button" class= "{% if data['ev_battery_charge_start_stopp'] %} charging-on{% else %}charging-off{% endif %}">
+            {% if data['ev_battery_charge_start_stopp'] %}
+            Stoppa laddningen
+            {% else %}
+            Starta laddning
+            {% endif %}
+        </button>
+    </div>
+
+    <script>
+    //handles the on/of button
+    document.addEventListener("DOMContentLoaded", ()=> {
+        const button = document.getElementById("toggle-button")
+        const statusElement = document.getElementById("charging-status");
+
+
+        button.addEventListener("click", () => {
+            const isCurrentlyCharging = statusElement.textContent.trim() === "På";
+            const actualStatus = isCurrentlyCharging ? "off" : "on";
+
+            fetch('/charging_handle', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({charging: actualStatus})
+            }).then(response => response.json())
+                .then(data => {
+                    const isCharging = actualStatus === "on";
+                    statusElement.textContent = isCharging ? "På" : "Av";
+                    button.textContent = isCharging ? "Stoppa laddningen" : "Starta laddningen";
+                    button.className = isCharging ? "charging-on" : "charging-off";
+                }).catch(error => console.error("Error toggling charge", error));
+        });
+
+        fetch('/info').then(response => response.json()).then(
+            data => {
+                const isCharging = data.ev_battery_charge_start_stopp;
+                statusElement.textContent = isCharging ? "På" : "Av";
+                button.textContent = isCharging ? "Stoppa laddningen " : "Starta laddningen";
+                button.className = isCharging ? "charging-on" : "charging-off";
+
+            }
+        ).catch(error => console.error("Error fetching charge status", error));
+
+
+//updates battery level
+   const socket = io();
+    socket.on('update_time', (data) => {
+        document.getElementById("battery-level").textContent = data.battery_capacity_kWh;
+        document.getElementById("battery-percent").textContent = data.ev_batt_capacity_percent + " % ";
+        const isCharging = data.charging;
+        document.getElementById("charging-status").textContent = data.charging ? "På" : "Av";
+
+        const button = document.getElementById("toggle-button");
+        button.textContent = isCharging ? "Stoppa laddningen" : "Starta laddningen";
+        button.className = isCharging ? "charging-on " : "charging-off";
+   });
+   });
+    </script>
+{% endblock %}

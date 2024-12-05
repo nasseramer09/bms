@@ -1,0 +1,92 @@
+body{
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    text-align: center;
+
+}
+
+header{
+    background-color: #6200ea;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+
+}
+
+nav ul{
+    list-style: none;
+    padding: 0;
+
+}
+
+nav ul li{
+    display: inline;
+    margin-right: 15px;
+
+}
+
+nav ul li q{
+    color: white;
+    text-decoration: none;
+}
+
+
+table {
+
+    width: 30%;
+    border-collapse: collapse;
+    margin: 10px auto;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+    #toggle-button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        color: white;
+        cursor: pointer;
+    }
+
+    .charging-on {
+        background-color: green;
+    }
+
+    .charging-off {
+        background-color: red;
+    }
+
+    #toggle-button:hover {
+        opacity: 0.8;
+    }
+    .discharge-button{
+        background-color: red;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+
+    }
+
+     .discharge-button:hover{
+        background-color: red;
+
+
+    }
+
+
