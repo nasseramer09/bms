@@ -102,6 +102,7 @@ def charging_optimizer():
                 requests.post(f"{url}/charge", json={"charging": "off"})
 
 
+
         except Exception as e:
             print(f"error while optimizing: {e}")
         finally:
